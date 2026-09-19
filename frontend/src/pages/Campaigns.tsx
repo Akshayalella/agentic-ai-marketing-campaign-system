@@ -10,7 +10,9 @@ export default function Campaigns() {
   const load = () => {
     campaigns()
       .then(setData)
-      .catch(() => {});
+      .catch(() => {
+        setMessage('Failed to load campaigns.');
+      });
   };
 
   useEffect(() => {
@@ -23,28 +25,61 @@ export default function Campaigns() {
     setMessage(`Campaign #${id} selected.`);
   };
 
-  const handleRun = async (id: number) => {
-    const campaign = data.find((c) => c.id === id);
-
-    if (
-      campaign &&
-      campaign.workflow_status &&
-      campaign.workflow_status !== 'not_started'
-    ) {
-      setMessage(
-        `Campaign #${id} is already at "${campaign.workflow_status}". Agents will not be rerun.`
-      );
+  const handleRun = async (id: number, status: string) => {
+    if (status !== 'not_started') {
+      setMessage(`Campaign #${id} has already been processed.`);
       return;
     }
 
     try {
+      setMessage(`Running six-agent workflow for Campaign #${id}...`);
       setActiveCampaignId(id);
-      setMessage(`Running agents for Campaign #${id}...`);
+      setSelectedId(id);
+
       await runCampaign(id);
-      setMessage(`Campaign #${id} agents completed.`);
+
+      setMessage(`Campaign #${id} workflow completed.`);
       load();
     } catch {
-      setMessage(`Failed to run agents for Campaign #${id}.`);
+      setMessage(`Failed to run Campaign #${id}.`);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const campaign = data.find((c) => c.id === id);
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete Campaign #${id}${
+        campaign?.product_name ? ` (${campaign.product_name})` : ''
+      }?\n\nThis will permanently delete the campaign and its generated content.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setMessage(`Deleting Campaign #${id}...`);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/campaigns/${id}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Delete failed');
+      }
+
+      if (selectedId === id) {
+        setSelectedId(null);
+      }
+
+      setMessage(`Campaign #${id} deleted successfully.`);
+      load();
+    } catch {
+      setMessage(`Failed to delete Campaign #${id}.`);
     }
   };
 
@@ -52,12 +87,22 @@ export default function Campaigns() {
     <div className="card">
       <div className="row">
         <h3>Campaigns</h3>
+
         <a className="button" href="/create">
           New campaign
         </a>
       </div>
 
-      {message && <p className="status">{message}</p>}
+      {message && (
+        <p
+          style={{
+            marginTop: '12px',
+            marginBottom: '12px',
+          }}
+        >
+          {message}
+        </p>
+      )}
 
       <table>
         <thead>
@@ -74,8 +119,11 @@ export default function Campaigns() {
           {data.map((c) => (
             <tr key={c.id}>
               <td>{c.product_name}</td>
+
               <td>{c.objective}</td>
+
               <td>₹{c.budget}</td>
+
               <td>{c.workflow_status}</td>
 
               <td>
@@ -88,16 +136,21 @@ export default function Campaigns() {
 
                 <button
                   className="button"
-                  onClick={() => handleRun(c.id)}
-                  disabled={
-                    c.workflow_status &&
-                    c.workflow_status !== 'not_started'
+                  disabled={c.workflow_status !== 'not_started'}
+                  onClick={() =>
+                    handleRun(c.id, c.workflow_status)
                   }
                 >
-                  {c.workflow_status &&
-                  c.workflow_status !== 'not_started'
-                    ? 'Already processed'
-                    : 'Run agents'}
+                  {c.workflow_status === 'not_started'
+                    ? 'Run agents'
+                    : 'Already processed'}
+                </button>{' '}
+
+                <button
+                  className="button secondary"
+                  onClick={() => handleDelete(c.id)}
+                >
+                  Delete
                 </button>
               </td>
             </tr>
