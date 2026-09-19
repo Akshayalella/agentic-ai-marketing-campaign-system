@@ -25,7 +25,6 @@ app = FastAPI(
     version="1.1.0"
 )
 
-
 cors_origins = [
     x.strip()
     for x in settings.cors_origins.split(",")
@@ -37,7 +36,6 @@ production_origin = "https://agentic-ai-marketing-campaign-syste.vercel.app"
 if production_origin not in cors_origins:
     cors_origins.append(production_origin)
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -46,9 +44,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 orch = CampaignOrchestrator()
-
 
 AGENT_NAMES = [
     "Marketing Requirement Analysis Agent",
@@ -114,6 +110,51 @@ def get_campaign(
         raise HTTPException(404, "Campaign not found")
 
     return c
+
+
+@app.delete("/api/campaigns/{cid}")
+def delete_campaign(
+    cid: int,
+    db: Session = Depends(get_db)
+):
+    c = db.get(Campaign, cid)
+
+    if not c:
+        raise HTTPException(404, "Campaign not found")
+
+    content_ids = [
+        x.id
+        for x in db.query(ContentItem.id)
+        .filter(ContentItem.campaign_id == cid)
+        .all()
+    ]
+
+    if content_ids:
+        db.query(ApprovalStep).filter(
+            ApprovalStep.content_id.in_(content_ids)
+        ).delete(
+            synchronize_session=False
+        )
+
+        db.query(ContentItem).filter(
+            ContentItem.id.in_(content_ids)
+        ).delete(
+            synchronize_session=False
+        )
+
+    db.query(AgentRun).filter(
+        AgentRun.campaign_id == cid
+    ).delete(
+        synchronize_session=False
+    )
+
+    db.delete(c)
+    db.commit()
+
+    return {
+        "status": "deleted",
+        "campaign_id": cid
+    }
 
 
 def brief(c):
@@ -188,6 +229,7 @@ def run_campaign(
 
     c.workflow_status = "awaiting_human_approval"
     c.status = "active"
+
     c.projected_analytics = json.dumps(
         result.get("analytics", {})
     )
@@ -581,11 +623,13 @@ def analytics_upload(
 
     try:
         text = file.file.read().decode("utf-8-sig")
+
         rows = list(
             csv.DictReader(
                 io.StringIO(text)
             )
         )
+
     except UnicodeDecodeError:
         raise HTTPException(
             400,
@@ -608,7 +652,8 @@ def analytics_upload(
     ]
 
     missing = [
-        k for k in keys
+        k
+        for k in keys
         if k not in (rows[0] or {})
     ]
 
@@ -626,6 +671,7 @@ def analytics_upload(
             )
             for k in keys
         }
+
     except (TypeError, ValueError):
         raise HTTPException(
             400,
@@ -698,6 +744,7 @@ def report_data(
                 "{}"
             )
         )
+
     except Exception:
         strat = orch.strategy.run(
             {"brief": b}
@@ -710,6 +757,7 @@ def report_data(
                 "[]"
             )
         )
+
     except Exception:
         research_data = orch.research.run(
             b
