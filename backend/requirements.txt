@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic-settings
+alembic
+pytest
+httpx
+reportlab
+pandas
+python-multipart
+openai
+langgraph>=0.2.0

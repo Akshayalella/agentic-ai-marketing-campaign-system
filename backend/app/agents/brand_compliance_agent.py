@@ -1,0 +1,2 @@
+from app.agents.content_review_agent import ContentReviewBrandComplianceAgent
+BrandComplianceAgent=ContentReviewBrandComplianceAgent

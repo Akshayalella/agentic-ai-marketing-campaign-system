@@ -1,0 +1,17 @@
+import axios from 'axios';
+export const api=axios.create({baseURL:import.meta.env.VITE_API_BASE_URL||'http://localhost:8000'});
+export const campaigns=()=>api.get('/api/campaigns').then(r=>r.data);
+export const createCampaign=(data:any)=>api.post('/api/campaigns',data).then(r=>r.data);
+export const runCampaign=(id:number)=>api.post(`/api/campaigns/${id}/run`).then(r=>r.data);
+export const content=(id:number)=>api.get(`/api/campaigns/${id}/content`).then(r=>r.data);
+export const research=(id:number)=>api.get(`/api/campaigns/${id}/research`).then(r=>r.data);
+export const strategy=(id:number)=>api.get(`/api/campaigns/${id}/strategy`).then(r=>r.data);
+export const calendar=(id:number)=>api.get(`/api/campaigns/${id}/calendar`).then(r=>r.data);
+export const report=(id:number)=>api.get(`/api/campaigns/${id}/report`).then(r=>r.data);
+export const approve=(id:number,comment='')=>api.post(`/api/content/${id}/approve`,{comment});
+export const reject=(id:number,comment='Needs revision')=>api.post(`/api/content/${id}/reject`,{comment});
+export const regenerate=(id:number)=>api.post(`/api/content/${id}/regenerate`);
+export const editContent=(id:number,body:string)=>api.put(`/api/content/${id}`,{body});
+export const publish=(id:number)=>api.post(`/api/content/${id}/publish`);
+export const analytics=(id:number,data:any)=>api.post(`/api/campaigns/${id}/analytics`,data).then(r=>r.data);
+export const analyticsUpload=(id:number,file:File)=>{const fd=new FormData(); fd.append('file',file); return api.post(`/api/campaigns/${id}/analytics/upload`,fd).then(r=>r.data);};
