@@ -6,7 +6,10 @@ Core endpoints:
 - `GET /api/agents`
 - `POST /api/campaigns`
 - `GET /api/campaigns`
-- `POST /api/campaigns/{id}/run`
+- `POST /api/campaigns/{id}/run` — asynchronous by default; use `?wait=true` for synchronous/test execution
+- `POST /api/campaigns/{id}/stop`
+- `DELETE /api/campaigns/{id}`
+- `GET /api/campaigns/{id}/status`
 - `GET /api/campaigns/{id}/research`
 - `GET /api/campaigns/{id}/strategy`
 - `GET /api/campaigns/{id}/content`

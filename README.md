@@ -19,17 +19,20 @@ The workflow uses shared state so each agent's output can be inspected. Publishi
 
 ## Improvements in this version
 
-- Campaign pages now use the selected campaign instead of hard-coded campaign ID `1`.
+- Campaign pages use a persisted selected campaign instead of a hard-coded campaign ID.
+- Campaign controls now support Select, Run agents, Stop and Delete with clear status/error feedback.
+- Agent execution runs in the background for the web UI and can be stopped between workflow stages.
 - Re-running a campaign replaces its generated package instead of creating duplicate content.
 - Strategy output includes objectives, audience segments, channel strategy, cadence, phased timeline, KPIs and budget allocation.
 - Budget allocation is weighted by platform and corrected so totals equal the campaign budget.
 - Content generation supports an OpenAI LLM provider with a deterministic demo fallback.
 - Generated content is checked for unsupported absolute claims, unsourced percentage claims, missing content and supplied brand rules.
 - Projected and observed analytics are persisted separately; observed CSV data is used in reports after upload.
+- Analytics now include a comparable 0–100 performance score plus target comparison; projected and observed datasets can produce different scores.
 - The human approval gate is tested through the actual API: publish fails before approval and succeeds after approval.
 - Human edits and regenerated drafts are automatically re-reviewed before they can be approved.
 - Campaign reruns remove dependent approval records before replacing generated content, preserving PostgreSQL foreign-key integrity.
-- Analytics CSV uploads validate required columns, numeric values, non-negative KPIs and basic KPI relationships.
+- Analytics CSV uploads validate required columns, numeric values, non-negative KPIs and basic KPI relationships, and preserve target comparisons supplied by the UI.
 - Research uses the configured web provider by default and clearly labels demo fallback results.
 
 ## Brand consistency & reviewer mechanism
@@ -217,7 +220,7 @@ The backend test suite covers:
 - strategy output completeness
 - real publish approval gate
 
-In the local validation environment, the backend suite completed with **17 passing tests**, including dedicated brand-guideline compliance tests for prohibited terms, required phrases, length limits and emoji restrictions. The frontend dependency installation/build could not be completed in the restricted environment because package downloads were unavailable; the project includes the required TypeScript React type dependencies for a normal `npm install && npm run build`.
+In the local validation environment, the backend suite completed with **26 passing tests**, including campaign-control, approval-gate, brand-guideline and analytics-score coverage. The frontend build was previously validated with `npm run build`; in this restricted validation environment a fresh dependency download was unavailable, so the final frontend changes were also reviewed statically.
 
 ## Documentation
 
@@ -302,6 +305,14 @@ Campaign records store projected and observed analytics separately. Content reco
 ### Prompt and agent documentation
 
 `docs/agents.md` describes each specialized agent's inputs, outputs and prompt responsibilities. The content-generation prompt prohibits invented statistics, guarantees, rankings, customers, certifications and unsupported capabilities. The reviewer is deterministic so the publishing gate is not dependent only on an LLM opinion.
+
+### Campaign controls
+
+The web UI supports selecting a campaign, starting the six-agent workflow asynchronously, stopping it between agent stages, and deleting a completed/stopped campaign. Re-running replaces the prior generated package to avoid duplicates.
+
+### Analytics score
+
+The 0–100 performance score is computed from engagement rate, CTR, conversion rate and CPL against fixed comparison benchmarks so projected and observed results remain comparable. User-entered targets are shown separately in target comparison and do not artificially force both scores to 100.
 
 ### Final verification
 

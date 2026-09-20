@@ -7,21 +7,30 @@ services:
       POSTGRES_PASSWORD: postgres
     ports: ["5432:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d marketing"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
   backend:
-    build: ../backend
+    build: ./backend
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/marketing
       DEMO_MODE: "true"
       LLM_PROVIDER: demo
       RESEARCH_PROVIDER: demo
       CORS_ORIGINS: http://localhost:5173
-    depends_on: [db]
+    depends_on:
+      db:
+        condition: service_healthy
     ports: ["8000:8000"]
   frontend:
-    build: ../frontend
+    build: ./frontend
     environment:
       VITE_API_BASE_URL: http://localhost:8000
-    depends_on: [backend]
+    depends_on:
+      backend:
+        condition: service_started
     ports: ["5173:5173"]
 volumes:
   pgdata:

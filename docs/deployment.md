@@ -17,7 +17,7 @@ Deploy the `frontend` directory.
 Set:
 `VITE_API_BASE_URL=https://YOUR-RENDER-BACKEND`
 
-Then update backend `CORS_ORIGINS` to the Vercel origin.
+Then update backend `CORS_ORIGINS` to the Vercel origin. When more than one Vercel domain is used, provide a comma-separated list of exact origins.
 
 ## Docker
 

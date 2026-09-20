@@ -4,6 +4,8 @@
 
 - [ ] Create Campaign works in deployed frontend.
 - [ ] Six-agent workflow completes.
+- [ ] Campaign list supports Select, Run agents and Delete.
+- [ ] Running campaigns show Stop and stop requests change the workflow to `stopped`.
 - [ ] Research page displays sources/personas.
 - [ ] Strategy page displays objectives, audience, channels, timeline, KPIs and budget.
 - [ ] Content Studio generates LinkedIn, Email and Instagram content when those platforms are selected.
@@ -15,6 +17,7 @@
 - [ ] Content Calendar shows Date, Platform, Content type, Topic, Caption/Content, Approval and Publishing status.
 - [ ] Analytics CSV upload succeeds for the supplied sample data.
 - [ ] Analytics displays Engagement Rate, CTR, Conversion Rate, CPL and Spending.
+- [ ] Analytics displays a 0–100 performance score and projected/observed scores can differ.
 - [ ] PDF export works.
 - [ ] CSV export works.
 

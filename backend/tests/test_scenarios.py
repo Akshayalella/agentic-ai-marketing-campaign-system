@@ -67,3 +67,23 @@ def test_analytics_rejects_invalid_csv(tmp_path):
     with bad.open('rb') as fh:
         r=client.post(f"/api/campaigns/{c['id']}/analytics/upload",files={"file":("bad.csv",fh,"text/csv")})
     assert r.status_code==400
+
+
+def test_analytics_targets_survive_csv_upload(tmp_path):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    c = client.post('/api/campaigns', json={"product_name": "Analytics Target Demo", "budget": 1000, "platforms": ["LinkedIn"]}).json()
+    csv_path = tmp_path / 'performance.csv'
+    csv_path.write_text('impressions,engagements,clicks,conversions,spending,leads\n10000,800,500,75,12000,60\n')
+    with csv_path.open('rb') as fh:
+        response = client.post(
+            f"/api/campaigns/{c['id']}/analytics/upload",
+            files={"file": ("performance.csv", fh, "text/csv")},
+            data={"targets": '{"engagement_rate":5,"ctr":2,"conversion_rate":1,"cost_per_lead":500}'},
+        )
+    assert response.status_code == 200
+    result = response.json()
+    assert result["observed"] is True
+    assert result["performance_score"] > 0
+    assert result["target_comparison"]["engagement_rate"]["status"] == "meets_target"
