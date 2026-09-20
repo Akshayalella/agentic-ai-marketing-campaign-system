@@ -102,3 +102,42 @@ def test_cannot_delete_while_running():
     assert result.status_code == 409
     with running_lock:
         running_events.pop(cid, None)
+
+
+def test_new_campaign_is_not_active_until_run_starts():
+    c = client.post("/api/campaigns", json=payload("Lifecycle Demo")).json()
+    assert c["status"] == "draft"
+    assert c["workflow_status"] == "not_started"
+    client.post(f"/api/campaigns/{c['id']}/run?wait=true")
+    refreshed = client.get(f"/api/campaigns/{c['id']}").json()
+    assert refreshed["status"] == "active"
+    assert refreshed["workflow_status"] == "awaiting_human_approval"
+
+
+def test_run_immediately_marks_campaign_active_and_workflow_running(monkeypatch):
+    c = client.post("/api/campaigns", json=payload("Run State Demo")).json()
+    cid = c["id"]
+    release = threading.Event()
+
+    def blocked_run(brief, stop_check):
+        while not release.is_set():
+            if stop_check():
+                raise WorkflowStopped("Workflow stopped by user")
+            time.sleep(0.01)
+        return {"analytics": {}, "reviewed_content": []}
+
+    monkeypatch.setattr("app.main.orch.run_campaign_cancellable", blocked_run)
+    result = client.post(f"/api/campaigns/{cid}/run")
+    assert result.status_code == 200
+    assert result.json()["workflow_status"] == "running"
+    status = client.get(f"/api/campaigns/{cid}/status").json()
+    assert status["status"] == "active"
+    assert status["workflow_status"] == "running"
+    assert status["running"] is True
+    release.set()
+    deadline = time.time() + 2
+    while time.time() < deadline:
+        status = client.get(f"/api/campaigns/{cid}/status").json()
+        if status["running"] is False:
+            break
+        time.sleep(0.03)

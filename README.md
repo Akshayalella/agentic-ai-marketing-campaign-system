@@ -97,6 +97,9 @@ Projected analytics may be produced during planning. Observed analytics are writ
 
 ## Database design
 
+The Alembic migration chain includes the campaign analytics fields (`projected_analytics` and `observed_analytics`) used by the SQLAlchemy model. Apply migrations with `alembic upgrade head` for PostgreSQL deployments; the application also creates missing tables for local SQLite demo use.
+
+
 The application uses SQLAlchemy models with PostgreSQL-compatible configuration and SQLite as the local default. The core relational model is:
 
 ```text

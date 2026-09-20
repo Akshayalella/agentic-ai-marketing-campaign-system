@@ -4,6 +4,7 @@ from app.agents import (
     ContentReviewBrandComplianceAgent, CampaignAnalyticsAgent,
 )
 from app.services.research_provider import DemoResearchProvider, WebResearchProvider
+import time
 
 
 class WorkflowStopped(Exception):
@@ -43,6 +44,20 @@ class CampaignOrchestrator:
         if stop_check and stop_check():
             raise WorkflowStopped("Workflow stopped by user")
 
+    def _stage_pause(self, stop_check):
+        """Give the demo UI a short, cancellable window to show each running stage."""
+        from app.core.config import settings
+        delay = max(0.0, float(settings.workflow_stage_delay_seconds or 0.0))
+        if delay <= 0:
+            return
+        deadline = time.monotonic() + delay
+        while True:
+            self._guard(stop_check)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return
+            time.sleep(min(0.1, remaining))
+
     def _build_graph(self, stop_check=None):
         try:
             from langgraph.graph import StateGraph, START, END
@@ -62,26 +77,32 @@ class CampaignOrchestrator:
 
             def requirements(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 return self.req.run(s["brief_input"])
 
             def research(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 return self.research.run(s["campaign_brief"])
 
             def strategy(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 return self.strategy.run({"brief": s["campaign_brief"], **s})
 
             def content(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 return self.content.run({"brief": s["campaign_brief"], **s})
 
             def review(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 return self.review.run({"brief": s["campaign_brief"], **s})
 
             def analytics(s):
                 self._guard(stop_check)
+                self._stage_pause(stop_check)
                 metrics = dict(self.PROJECTED_METRICS)
                 metrics["spending"] = float(s["campaign_brief"].get("budget", 0) or 0)
                 return {"analytics": self.analytics.run(metrics)}
@@ -107,17 +128,23 @@ class CampaignOrchestrator:
     def _sequential(self, brief, stop_check=None):
         state = {"brief_input": brief}
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         state.update(self.req.run(brief))
         state["brief"] = state["campaign_brief"]
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         state.update(self.research.run(state["brief"]))
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         state.update(self.strategy.run(state))
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         state.update(self.content.run(state))
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         state.update(self.review.run(state))
         self._guard(stop_check)
+        self._stage_pause(stop_check)
         metrics = dict(self.PROJECTED_METRICS)
         metrics["spending"] = float(brief.get("budget", 0) or 0)
         state["analytics"] = self.analytics.run(metrics)

@@ -1,8 +1,6 @@
 __pycache__/
 *.pyc
 .env
-.env.*
-!.env.example
 .venv/
 venv/
 node_modules/
@@ -10,4 +8,3 @@ dist/
 *.db
 .pytest_cache/
 .DS_Store
-dist/dist/

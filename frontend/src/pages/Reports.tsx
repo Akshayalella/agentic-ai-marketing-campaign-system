@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { apiErrorMessage, report } from '../services/api';
-import { getActiveCampaignId } from '../services/campaign';
+import { apiErrorMessage, campaigns, report } from '../services/api';
+import { getActiveCampaignId, getCampaignDisplayNumber } from '../services/campaign';
 
 const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -8,15 +8,17 @@ export default function Reports() {
   const id = getActiveCampaignId();
   const [r, setR] = useState<any>();
   const [error, setError] = useState('');
+  const [campaignList, setCampaignList] = useState<any[]>([]);
 
   useEffect(() => {
-    if (id) report(id).then(setR).catch(e => setError(apiErrorMessage(e)));
+    if (!id) return;
+    Promise.all([report(id), campaigns()]).then(([reportData, allCampaigns]) => { setR(reportData); setCampaignList(allCampaigns); }).catch(e => setError(apiErrorMessage(e)));
   }, [id]);
 
   if (!id) return <div className="card"><h3>Select a campaign first</h3><p className="muted">Go to Campaigns and select a campaign.</p></div>;
   return <div className="grid2">
     <div className="card">
-      <h3>Campaign report · #{id}</h3>
+      <h3>Campaign report · #{getCampaignDisplayNumber(campaignList, id) ?? 1}</h3>
       <p className="muted">Consolidated strategy, research, content calendar, approvals and analytics.</p>
       {error && <p className="error">{error}</p>}
       {r && <>

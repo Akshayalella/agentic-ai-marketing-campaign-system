@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { apiErrorMessage, approve, content, editContent, publish, regenerate, reject } from '../services/api';
-import { getActiveCampaignId } from '../services/campaign';
+import { apiErrorMessage, approve, campaigns, content, editContent, publish, regenerate, reject } from '../services/api';
+import { getActiveCampaignId, getCampaignDisplayNumber } from '../services/campaign';
 
 export default function ContentStudio() {
   const id = getActiveCampaignId();
@@ -9,10 +9,15 @@ export default function ContentStudio() {
   const [working, setWorking] = useState<Record<number, string>>({});
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [campaignList, setCampaignList] = useState<any[]>([]);
 
   const load = async () => {
     if (!id) return;
-    try { setItems(await content(id)); }
+    try {
+      const [contentItems, allCampaigns] = await Promise.all([content(id), campaigns()]);
+      setItems(contentItems);
+      setCampaignList(allCampaigns);
+    }
     catch (e) { setError(apiErrorMessage(e)); }
   };
 
@@ -21,9 +26,15 @@ export default function ContentStudio() {
   const action = async (item: any, name: string, fn: () => Promise<any>) => {
     setWorking(prev => ({ ...prev, [item.id]: name })); setError(''); setMessage('');
     try {
-      await fn();
+      const result = await fn();
       setMessage(`${name} completed for ${item.platform}.`);
-      await load();
+      if (result?.content?.id) {
+        setItems(prev => prev.map(existing =>
+          existing.id === result.content.id ? result.content : existing
+        ));
+      } else {
+        await load();
+      }
     } catch (e) { setError(apiErrorMessage(e)); }
     finally { setWorking(prev => ({ ...prev, [item.id]: '' })); }
   };
@@ -32,7 +43,7 @@ export default function ContentStudio() {
 
   return <>
     <div className="hero">
-      <div className="row"><div><h2>Content Studio · Campaign #{id}</h2><p className="muted">Edit, review, approve or regenerate AI-generated content. Publishing requires human approval.</p></div><button className="button secondary" onClick={() => void load()}>Refresh</button></div>
+      <div className="row"><div><h2>Content Studio · Campaign #{getCampaignDisplayNumber(campaignList, id) ?? 1}</h2><p className="muted">Edit, review, approve or regenerate AI-generated content. Publishing requires human approval.</p></div><button className="button secondary" onClick={() => void load()}>Refresh</button></div>
     </div>
     {message && <p className="status">{message}</p>}
     {error && <p className="error">{error}</p>}

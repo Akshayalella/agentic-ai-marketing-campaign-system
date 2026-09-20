@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { analytics, analyticsUpload, apiErrorMessage, report } from '../services/api';
-import { getActiveCampaignId } from '../services/campaign';
+import { analytics, analyticsUpload, apiErrorMessage, campaigns, report } from '../services/api';
+import { getActiveCampaignId, getCampaignDisplayNumber } from '../services/campaign';
 
 const emptyTargets = { engagement_rate: '', ctr: '', conversion_rate: '', cost_per_lead: '' };
 
@@ -10,10 +10,11 @@ export default function Analytics() {
   const [targets, setTargets] = useState(emptyTargets);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [campaignList, setCampaignList] = useState<any[]>([]);
 
   useEffect(() => {
     if (!id) return;
-    report(id).then(data => setR(data.analytics)).catch(() => {});
+    Promise.all([report(id), campaigns()]).then(([data, allCampaigns]) => { setR(data.analytics); setCampaignList(allCampaigns); }).catch(() => {});
   }, [id]);
 
   if (!id) return <div className="card"><h3>Select a campaign first</h3><p className="muted">Go to Campaigns and select a campaign.</p></div>;
@@ -43,7 +44,7 @@ export default function Analytics() {
   };
 
   return <div className="card">
-    <h3>Campaign analytics · #{id}</h3>
+    <h3>Campaign analytics · #{getCampaignDisplayNumber(campaignList, id) ?? 1}</h3>
     <p className="muted">Projected and observed metrics are stored separately. The performance score is calculated from engagement, CTR, conversion rate and CPL against transparent benchmark/target values.</p>
 
     <div className="grid2">

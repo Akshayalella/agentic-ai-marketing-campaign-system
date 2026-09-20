@@ -37,7 +37,7 @@ export default function Campaigns() {
   const select = (id: number) => {
     setActiveCampaignId(id);
     setActiveId(id);
-    setMessage(`Campaign #${id} selected.`);
+    setMessage('Campaign selected.');
     setError('');
   };
 
@@ -49,7 +49,6 @@ export default function Campaigns() {
     try {
       const result = await runCampaign(campaign.id);
       setData(prev => prev.map(x => x.id === campaign.id ? { ...x, workflow_status: result.workflow_status || 'running', status: 'active' } : x));
-      await load();
     } catch (e) {
       setError(apiErrorMessage(e));
     } finally {
@@ -105,13 +104,14 @@ export default function Campaigns() {
 
     <div className="table-wrap">
       <table>
-        <thead><tr><th>Product</th><th>Objective</th><th>Budget</th><th>Status</th><th>Action</th></tr></thead>
+        <thead><tr><th>Campaign</th><th>Product</th><th>Objective</th><th>Budget</th><th>Status</th><th>Action</th></tr></thead>
         <tbody>
           {data.map(c => {
             const selected = activeId === c.id;
             const running = c.workflow_status === 'running';
             const action = busy[c.id];
             return <tr key={c.id} className={selected ? 'selected-row' : ''}>
+              <td><strong>#{data.indexOf(c) + 1}</strong></td>
               <td><strong>{c.product_name}</strong></td>
               <td>{c.objective}</td>
               <td>₹{Number(c.budget).toLocaleString('en-IN')}</td>
@@ -135,7 +135,7 @@ export default function Campaigns() {
               </td>
             </tr>;
           })}
-          {!data.length && <tr><td colSpan={5} className="muted">No campaigns yet.</td></tr>}
+          {!data.length && <tr><td colSpan={6} className="muted">No campaigns yet.</td></tr>}
         </tbody>
       </table>
     </div>
