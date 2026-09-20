@@ -42,4 +42,7 @@ def pdf_bytes(campaign, items, strategy=None, research=None, analytics=None):
     line("Content Calendar & Approval Status",True,13)
     for x in items:
         line(f"{x.scheduled_date} | {x.platform} | {x.content_type} | approval={x.approval_status} | publish={x.publishing_status}")
+        line(f"Topic: {x.topic}")
+        for body_line in str(x.body or "").splitlines()[:6]:
+            line(f"Content: {body_line}")
     c.save(); return buf.getvalue()
