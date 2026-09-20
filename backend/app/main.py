@@ -186,7 +186,7 @@ def create_campaign(data: CampaignCreate, db: Session = Depends(get_db)):
 
 @app.get("/api/campaigns", response_model=list[CampaignOut])
 def list_campaigns(db: Session = Depends(get_db)):
-    return db.query(Campaign).order_by(Campaign.id.desc()).all()
+    return db.query(Campaign).order_by(Campaign.id.asc()).all()
 
 
 @app.get("/api/campaigns/{cid}", response_model=CampaignOut)
@@ -233,13 +233,12 @@ def stop_campaign(cid: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "Campaign not found")
     with running_lock:
         event = running_events.get(cid)
-    if not event or c.workflow_status != "running":
-        raise HTTPException(409, "Campaign workflow is not currently running.")
-    event.set()
+    if event:
+        event.set()
     c.workflow_status = "stopped"
     c.status = "stopped"
     db.commit()
-    return {"campaign_id": cid, "workflow_status": "stopped"}
+    return {"campaign_id": cid, "workflow_status": "stopped", "status": "stopped", "running": False}
 
 
 @app.delete("/api/campaigns/{cid}")

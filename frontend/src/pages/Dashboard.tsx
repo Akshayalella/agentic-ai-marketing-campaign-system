@@ -4,13 +4,19 @@ import { apiErrorMessage, campaigns } from '../services/api';
 export default function Dashboard() {
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const load = async () => {
+  const load = async (manual = false) => {
+    if (manual) setRefreshing(true);
     try {
       setData(await campaigns());
       setError('');
+      setLastUpdated(new Date());
     } catch (e) {
       setError(apiErrorMessage(e));
+    } finally {
+      if (manual) setRefreshing(false);
     }
   };
 
@@ -29,8 +35,9 @@ export default function Dashboard() {
         <div>
           <h2>AI-powered campaign operations</h2>
           <p className="muted">Run the six-agent workflow from requirements to approved content and measurable campaign reports.</p>
+          {lastUpdated && <p className="muted" style={{ margin: '8px 0 0' }}>Last refreshed: {lastUpdated.toLocaleTimeString()}</p>}
         </div>
-        <button className="button secondary" onClick={() => void load()}>Refresh</button>
+        <button className="button secondary" onClick={() => void load(true)} disabled={refreshing}>{refreshing ? 'Refreshing…' : 'Refresh'}</button>
       </div>
     </div>
     {error && <p className="error">{error}</p>}

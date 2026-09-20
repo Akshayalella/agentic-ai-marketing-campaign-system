@@ -141,3 +141,22 @@ def test_run_immediately_marks_campaign_active_and_workflow_running(monkeypatch)
         if status["running"] is False:
             break
         time.sleep(0.03)
+
+
+def test_stop_unused_campaign_is_allowed():
+    c = client.post("/api/campaigns", json=payload("Unused Stop Demo")).json()
+    cid = c["id"]
+    result = client.post(f"/api/campaigns/{cid}/stop")
+    assert result.status_code == 200
+    body = result.json()
+    assert body["workflow_status"] == "stopped"
+    assert body["status"] == "stopped"
+    assert client.get(f"/api/campaigns/{cid}/status").json()["running"] is False
+
+
+def test_campaign_list_uses_user_facing_creation_order():
+    first = client.post("/api/campaigns", json=payload("First List Demo")).json()
+    second = client.post("/api/campaigns", json=payload("Second List Demo")).json()
+    listed = client.get("/api/campaigns").json()
+    ids = [item["id"] for item in listed if item["id"] in {first["id"], second["id"]}]
+    assert ids == [first["id"], second["id"]]

@@ -34,7 +34,7 @@
 - [ ] Backend `/health` returns HTTP 200.
 - [ ] Frontend `VITE_API_BASE_URL` points to the deployed backend.
 - [ ] Backend `CORS_ORIGINS` contains the deployed Vercel origin.
-- [ ] Database is persistent in the deployed environment.
+- [ ] Database is persistent in the deployed environment and the PostgreSQL schema is initialized with the provided Alembic migrations.
 - [ ] No production secrets are committed to GitHub.
 
 ## D. Submission evidence

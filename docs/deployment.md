@@ -21,5 +21,4 @@ Then update backend `CORS_ORIGINS` to the Vercel origin. When more than one Verc
 
 ## Docker
 
-From repository root:
-`docker compose -f docker/docker-compose.yml up --build`
+From repository root, either run `docker compose up --build` (root compose file) or `docker compose -f docker/docker-compose.yml up --build` (the paths in the nested compose file are configured relative to the repository root).

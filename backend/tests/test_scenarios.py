@@ -87,3 +87,9 @@ def test_analytics_targets_survive_csv_upload(tmp_path):
     assert result["observed"] is True
     assert result["performance_score"] > 0
     assert result["target_comparison"]["engagement_rate"]["status"] == "meets_target"
+
+def test_strategy_timeline_sums_to_duration_for_short_campaign():
+    strategy=CampaignStrategyAgent().run({"brief":brief(duration_days=1)})["strategy"]
+    phases=strategy["timeline_phases"]
+    assert all(int(x["days"]) >= 0 for x in phases)
+    assert sum(int(x["days"]) for x in phases) == 1

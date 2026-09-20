@@ -13,7 +13,7 @@ services:
       timeout: 5s
       retries: 12
   backend:
-    build: ./backend
+    build: ../backend
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/marketing
       DEMO_MODE: "true"
@@ -25,7 +25,7 @@ services:
         condition: service_healthy
     ports: ["8000:8000"]
   frontend:
-    build: ./frontend
+    build: ../frontend
     environment:
       VITE_API_BASE_URL: http://localhost:8000
     depends_on:

@@ -1,6 +1,7 @@
-from sqlalchemy import Column,Integer,String,Text,ForeignKey,DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from datetime import datetime, timezone
 from app.core.database import Base
+
 class ApprovalStep(Base):
     __tablename__="approval_steps"
     id=Column(Integer,primary_key=True)

@@ -58,7 +58,7 @@ export default function Campaigns() {
 
   const stop = async (campaign: any) => {
     setBusy(prev => ({ ...prev, [campaign.id]: 'stopping' }));
-    setMessage(`Stopping workflow for ${campaign.product_name}...`);
+    setMessage(`${campaign.workflow_status === 'running' ? 'Stopping workflow' : 'Stopping campaign'} for ${campaign.product_name}...`);
     setError('');
     try {
       const result = await stopCampaign(campaign.id);
@@ -122,12 +122,13 @@ export default function Campaigns() {
                     {selected ? 'Selected' : 'Select'}
                   </button>
                   {running
-                    ? <button className="button warning" onClick={() => void stop(c)} disabled={action === 'stopping'}>
-                        {action === 'stopping' ? 'Stopping…' : 'Stop'}
-                      </button>
+                    ? <button className="button secondary" disabled>Running…</button>
                     : <button className="button" onClick={() => void run(c)} disabled={!!action}>
                         {action === 'running' ? 'Starting…' : 'Run agents'}
                       </button>}
+                  <button className="button warning" onClick={() => void stop(c)} disabled={action === 'stopping' || action === 'deleting' || (running && action === 'running') || c.workflow_status === 'stopped'}>
+                    {action === 'stopping' ? 'Stopping…' : c.workflow_status === 'stopped' ? 'Stopped' : 'Stop'}
+                  </button>
                   <button className="button danger" onClick={() => void remove(c)} disabled={running || !!action}>
                     {action === 'deleting' ? 'Deleting…' : 'Delete'}
                   </button>
