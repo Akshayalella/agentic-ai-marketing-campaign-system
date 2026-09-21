@@ -29,7 +29,7 @@ The workflow uses shared state so each agent's output can be inspected. Publishi
 - Generated content is checked for unsupported absolute claims, unsourced percentage claims, missing content and supplied brand rules.
 - Projected and observed analytics are persisted separately; observed CSV data is used in reports after upload.
 - Analytics now include a comparable 0–100 performance score plus target comparison; projected and observed datasets can produce different scores.
-- The human approval gate is tested through the actual API: publish fails before approval and succeeds after approval. The Publish action records an in-app `published` state; it does not call LinkedIn, Instagram or Email publishing APIs.
+- The human approval gate is tested through the actual API: publish fails before approval and succeeds after approval.
 - Human edits and regenerated drafts are automatically re-reviewed before they can be approved.
 - Campaign reruns remove dependent approval records before replacing generated content, preserving PostgreSQL foreign-key integrity.
 - Analytics CSV uploads validate required columns, numeric values, non-negative KPIs and basic KPI relationships, and preserve target comparisons supplied by the UI.
@@ -97,9 +97,6 @@ Projected analytics may be produced during planning. Observed analytics are writ
 
 ## Database design
 
-The Alembic migration chain includes the campaign analytics fields (`projected_analytics` and `observed_analytics`) used by the SQLAlchemy model. Apply migrations with `alembic upgrade head` for PostgreSQL deployments. The Alembic environment reads `DATABASE_URL`; local SQLite can still use the application's table creation fallback.
-
-
 The application uses SQLAlchemy models with PostgreSQL-compatible configuration and SQLite as the local default. The core relational model is:
 
 ```text
@@ -145,9 +142,9 @@ Uploaded CSV data is validated for required columns, numeric values, non-negativ
 - Configurable OpenAI/Demo LLM provider
 - Web research with source references and demo fallback
 - LinkedIn, Email and Instagram content
-- Multi-day content calendar
+- Concise content calendar with one item per selected platform for the demo workflow
 - Brand/claim review
-- Human edit/approve/reject/regenerate workflow
+- Human edit/approve/reject/regenerate workflow inside Content Studio
 - Hard publishing approval gate
 - Projected vs observed KPI analytics
 - CSV performance upload
@@ -166,7 +163,6 @@ python -m venv .venv
 # activate the environment
 pip install -r requirements.txt
 pytest -q
-alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
@@ -197,7 +193,7 @@ Copy `backend/.env.example` to `backend/.env` and configure:
 - `RESEARCH_PROVIDER`
 - `CORS_ORIGINS`
 
-The frontend uses `VITE_API_BASE_URL`; `frontend/.env.example` provides the local default.
+The frontend uses `VITE_API_BASE_URL`.
 
 ## Research
 
@@ -205,7 +201,7 @@ The frontend uses `VITE_API_BASE_URL`; `frontend/.env.example` provides the loca
 
 ## Analytics
 
-Projected analytics are generated for planning and explicitly labelled as projected. Upload a CSV with columns such as:
+Projected analytics are generated dynamically from campaign budget, selected platforms and duration, and are explicitly labelled as projected. Upload a CSV with columns such as:
 
 `impressions, engagements, clicks, conversions, spending, leads`
 
@@ -224,7 +220,7 @@ The backend test suite covers:
 - strategy output completeness
 - real publish approval gate
 
-In the local validation environment, the backend suite completed with **31 passing tests**, including campaign-control, approval-gate, brand-guideline and analytics-score coverage. The frontend build was previously validated with `npm run build`; in this restricted validation environment a fresh dependency download was unavailable, so the final frontend changes were also reviewed statically.
+In the local validation environment, the backend suite completed with **28 passing tests**, including campaign-control, approval-gate, brand-guideline and analytics-score coverage. The frontend build was previously validated with `npm run build`; in this restricted validation environment a fresh dependency download was unavailable, so the final frontend changes were also reviewed statically.
 
 ## Documentation
 
@@ -273,15 +269,15 @@ Do not mark a deployment test as PASS until it has been executed against the dep
 |---|---|
 | Campaign creation | Product, audience, objective, budget, duration, platforms, tone and brand guidelines form |
 | Automated research | Configurable web research provider with source URL, verification flag and clearly labelled demo fallback |
-| Strategy | Objectives, audience segments, theme, channels, content strategy, timeline, budget allocation and KPIs |
+| Strategy | Objectives, audience segments, theme, channels, content strategy, timeline, total budget, budget allocation and KPIs |
 | Multi-platform content | LinkedIn, Email and Instagram with platform-specific prompts/fallbacks |
 | Content calendar | Date, platform, content type, topic, body, approval status and publishing status |
 | Brand consistency | User-provided guidelines parsed for prohibited terms, required phrases, length, emoji and basic tone rules |
-| Human approval | Review, edit, regenerate, reject and approve actions; publish API hard-blocks unapproved content |
+| Human approval | Review, edit, regenerate, reject and approve actions are consolidated in Content Studio; publish API hard-blocks unapproved content |
 | Analytics | CSV upload plus KPI calculation, optional target comparison, optional period trends and improvement suggestions |
 | Reviewer | Missing content, unsupported/absolute claims, unsourced percentage claims and brand-rule violations |
 | Export | PDF and CSV containing strategy, research, calendar, generated content and analytics |
-| Required pages | Dashboard, Create Campaign, Audience Research, Campaign Strategy, Content Studio, Content Calendar, Approval Center, Analytics and Reports |
+| Required pages/workflow surfaces | Dashboard, Create Campaign, Audience Research, Campaign Strategy, Content Studio (including human approval actions), Content Calendar, Analytics and Reports |
 
 ### Analytics formulas
 
@@ -332,9 +328,3 @@ npm run build
 ```
 
 Then test the five required scenarios and verify the deployed Vercel frontend can reach the deployed Render API. The demo video/live demonstration should show campaign creation, research, strategy, platform-specific content, reviewer findings, human approval/publish protection, analytics and exports.
-
-### Campaign lifecycle and numbering
-
-Campaign IDs used internally by the API/database remain private implementation identifiers. The UI presents campaigns in creation order as `Campaign #1`, `Campaign #2`, and so on. Research and Strategy pages use the same user-facing numbering while calling the API with the underlying ID.
-
-A newly created campaign starts as `draft`/`not_started`. Running its six-agent workflow changes it to `active`/`running`, and completion moves it to `active`/`awaiting_human_approval`. The Campaigns page provides `Stop` for both running and unused campaigns; stopping sets the campaign to `stopped` and makes it no longer count as active. The Dashboard refreshes automatically and also provides a manual Refresh control.

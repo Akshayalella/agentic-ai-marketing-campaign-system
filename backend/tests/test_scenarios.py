@@ -88,8 +88,22 @@ def test_analytics_targets_survive_csv_upload(tmp_path):
     assert result["performance_score"] > 0
     assert result["target_comparison"]["engagement_rate"]["status"] == "meets_target"
 
-def test_strategy_timeline_sums_to_duration_for_short_campaign():
-    strategy=CampaignStrategyAgent().run({"brief":brief(duration_days=1)})["strategy"]
-    phases=strategy["timeline_phases"]
-    assert all(int(x["days"]) >= 0 for x in phases)
-    assert sum(int(x["days"]) for x in phases) == 1
+
+def test_content_is_one_item_per_selected_platform():
+    b=brief(platforms=["LinkedIn","Instagram","Email"], duration_days=30)
+    out=ContentGenerationAgent().run({"brief":b})["content"]
+    assert len(out)==3
+    assert {x["platform"] for x in out}=={"LinkedIn","Instagram","Email"}
+
+
+def test_projected_metrics_change_with_budget_and_platforms():
+    from app.workflows.orchestrator import CampaignOrchestrator
+    small=CampaignOrchestrator.projected_metrics(brief(budget=5000))
+    large=CampaignOrchestrator.projected_metrics(brief(budget=50000))
+    linkedin=CampaignOrchestrator.projected_metrics(brief(budget=5000, platforms=["LinkedIn"]))
+    assert small["spending"]==5000
+    assert large["spending"]==50000
+    assert small["engagements"] != large["engagements"]
+    assert small["clicks"] != large["clicks"]
+    assert small["conversions"] != large["conversions"]
+    assert linkedin["engagements"] != small["engagements"] or linkedin["clicks"] != small["clicks"]

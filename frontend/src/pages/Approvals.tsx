@@ -1,1 +1,0 @@
-import ContentStudio from './ContentStudio'; export default function Approvals(){return <><div className="hero"><h2>Human approval center</h2><p className="muted">Review, regenerate, reject or approve. Publishing remains blocked until approval.</p></div><ContentStudio/></>}

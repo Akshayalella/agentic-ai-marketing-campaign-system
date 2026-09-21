@@ -1,17 +1,16 @@
 import {useEffect,useState} from 'react';
-import {calendar, campaigns} from '../services/api';
-import {getActiveCampaignId, getCampaignDisplayNumber} from '../services/campaign';
+import {calendar} from '../services/api';
+import {getActiveCampaignId} from '../services/campaign';
 
 export default function ContentCalendar(){
   const id=getActiveCampaignId();
   const [items,setItems]=useState<any[]>([]);
-  const [campaignList,setCampaignList]=useState<any[]>([]);
-  useEffect(()=>{if(id) Promise.all([calendar(id), campaigns()]).then(([calendarItems, allCampaigns])=>{setItems(calendarItems);setCampaignList(allCampaigns)}).catch(()=>{})},[id]);
+  useEffect(()=>{if(id) calendar(id).then(setItems).catch(()=>{})},[id]);
 
   if(!id) return <div className="card"><h3>Select a campaign first</h3><p className="muted">Go to Campaigns and select a campaign.</p></div>;
 
   return <div className="card">
-    <h3>Content calendar · Campaign #{getCampaignDisplayNumber(campaignList, id) ?? 1}</h3>
+    <h3>Content calendar · Campaign #{id}</h3>
     <p className="muted">Scheduled content, review state and publishing state. Publishing remains blocked until human approval.</p>
     <div style={{overflowX:'auto'}}>
       <table>

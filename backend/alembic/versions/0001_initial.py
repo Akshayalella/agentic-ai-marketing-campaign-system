@@ -40,7 +40,7 @@ def upgrade():
         sa.Column("content_id",sa.Integer,sa.ForeignKey("content_items.id"),nullable=False),
         sa.Column("status",sa.String(40),default="pending"),
         sa.Column("comment",sa.Text,default=""),
-        sa.Column("updated_at",sa.DateTime,default=sa.func.now()))
+        sa.Column("created_at",sa.DateTime,default=sa.func.now()))
     op.create_table("agent_runs",
         sa.Column("id",sa.Integer,primary_key=True),
         sa.Column("campaign_id",sa.Integer,sa.ForeignKey("campaigns.id"),nullable=False),

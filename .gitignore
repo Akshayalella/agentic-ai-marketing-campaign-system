@@ -1,8 +1,6 @@
 __pycache__/
-*.py[cod]
+*.pyc
 .env
-.env.*
-!.env.example
 .venv/
 venv/
 node_modules/

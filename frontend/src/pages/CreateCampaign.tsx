@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { apiErrorMessage, createCampaign } from '../services/api';
+import { apiErrorMessage, createCampaign, runCampaign } from '../services/api';
 import { setActiveCampaignId } from '../services/campaign';
 
 const AVAILABLE_PLATFORMS = ['LinkedIn', 'Email', 'Instagram'];
@@ -42,7 +42,8 @@ export default function CreateCampaign() {
     try {
       const c = await createCampaign({ ...f, product_name: f.product_name.trim(), target_audience: f.target_audience.trim() });
       setActiveCampaignId(c.id);
-      setMessage('Campaign created successfully. Go to Campaigns and click Run agents when you are ready to start the six-agent workflow.');
+      await runCampaign(c.id);
+      setMessage(`Campaign #${c.id} created. Six-agent workflow is running in the background.`);
     } catch (e) {
       setError(apiErrorMessage(e));
     } finally {
@@ -78,7 +79,7 @@ export default function CreateCampaign() {
     <label>Brand tone</label>
     <input value={f.brand_tone} onChange={e => update('brand_tone', e.target.value)} />
 
-    <button className="button" disabled={submitting}>{submitting ? 'Creating…' : 'Create campaign'}</button>
+    <button className="button" disabled={submitting}>{submitting ? 'Creating…' : 'Create & run six-agent workflow'}</button>
     {message && <p className="status">{message} <button type="button" className="link-button" onClick={() => navigate('/campaigns')}>Open campaigns</button></p>}
     {error && <p className="error">{error}</p>}
   </form>;

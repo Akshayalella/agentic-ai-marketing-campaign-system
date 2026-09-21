@@ -186,7 +186,7 @@ def create_campaign(data: CampaignCreate, db: Session = Depends(get_db)):
 
 @app.get("/api/campaigns", response_model=list[CampaignOut])
 def list_campaigns(db: Session = Depends(get_db)):
-    return db.query(Campaign).order_by(Campaign.id.asc()).all()
+    return db.query(Campaign).order_by(Campaign.id.desc()).all()
 
 
 @app.get("/api/campaigns/{cid}", response_model=CampaignOut)
@@ -233,12 +233,13 @@ def stop_campaign(cid: int, db: Session = Depends(get_db)):
         raise HTTPException(404, "Campaign not found")
     with running_lock:
         event = running_events.get(cid)
-    if event:
-        event.set()
+    if not event or c.workflow_status != "running":
+        raise HTTPException(409, "Campaign workflow is not currently running.")
+    event.set()
     c.workflow_status = "stopped"
     c.status = "stopped"
     db.commit()
-    return {"campaign_id": cid, "workflow_status": "stopped", "status": "stopped", "running": False}
+    return {"campaign_id": cid, "workflow_status": "stopped"}
 
 
 @app.delete("/api/campaigns/{cid}")
@@ -273,7 +274,10 @@ def strategy(cid: int, db: Session = Depends(get_db)):
     c = db.get(Campaign, cid)
     if not c:
         raise HTTPException(404, "Campaign not found")
-    return orch.strategy.run({"brief": brief(c)})["strategy"]
+    result = orch.strategy.run({"brief": brief(c)})["strategy"]
+    result["total_budget"] = float(c.budget or 0)
+    result["budget_allocation_total"] = round(sum(result.get("budget_allocation", {}).values()), 2)
+    return result
 
 
 @app.get("/api/campaigns/{cid}/content")
@@ -405,6 +409,10 @@ def analytics(cid: int, data: dict, db: Session = Depends(get_db)):
     c = db.get(Campaign, cid)
     if not c:
         raise HTTPException(404, "Campaign not found")
+    if not data.get("observed", False):
+        data = dict(data)
+        data.update(orch.projected_metrics(brief(c)))
+        data["observed"] = False
     result = CampaignAnalyticsAgent().run(data)
     if result.get("observed"):
         c.observed_analytics = json.dumps(result)
@@ -480,10 +488,7 @@ def report_data(cid, db):
         except Exception:
             analytics_data = {}
     if not analytics_data:
-        analytics_data = CampaignAnalyticsAgent().run({
-            "impressions": 10000, "engagements": 700, "clicks": 400,
-            "conversions": 45, "spending": float(c.budget), "leads": 45, "observed": False,
-        })
+        analytics_data = CampaignAnalyticsAgent().run(orch.projected_metrics(b))
     return c, items, strat, research_data, analytics_data
 
 

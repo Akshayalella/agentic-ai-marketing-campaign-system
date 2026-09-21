@@ -15,7 +15,7 @@ export function apiErrorMessage(error: unknown): string {
   return 'Request failed. Please try again.';
 }
 
-export const campaigns = () => api.get('/api/campaigns', { params: { _: Date.now() } }).then(r => r.data);
+export const campaigns = () => api.get('/api/campaigns').then(r => r.data);
 export const createCampaign = (data: unknown) => api.post('/api/campaigns', data).then(r => r.data);
 export const runCampaign = (id: number, wait = false) => api.post(`/api/campaigns/${id}/run`, null, { params: { wait } }).then(r => r.data);
 export const stopCampaign = (id: number) => api.post(`/api/campaigns/${id}/stop`).then(r => r.data);

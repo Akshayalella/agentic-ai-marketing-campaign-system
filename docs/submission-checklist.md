@@ -7,17 +7,17 @@
 - [ ] Campaign list supports Select, Run agents and Delete.
 - [ ] Running campaigns show Stop and stop requests change the workflow to `stopped`.
 - [ ] Research page displays sources/personas.
-- [ ] Strategy page displays objectives, audience, channels, timeline, KPIs and budget.
-- [ ] Content Studio generates LinkedIn, Email and Instagram content when those platforms are selected.
+- [ ] Strategy page displays objectives, audience, channels, timeline, KPIs, total budget and budget allocation.
+- [ ] Content Studio generates exactly one platform-specific item for each selected platform.
 - [ ] Reviewer status and notes are visible for every content item.
 - [ ] Human edit triggers automated re-review.
-- [ ] Human approval is required before publishing.
+- [ ] Human approval is required before publishing and is handled directly in Content Studio (no duplicate Approval Center page).
 - [ ] Publishing before approval is rejected by the backend with HTTP 409.
 - [ ] Approved content can be published.
 - [ ] Content Calendar shows Date, Platform, Content type, Topic, Caption/Content, Approval and Publishing status.
 - [ ] Analytics CSV upload succeeds for the supplied sample data.
 - [ ] Analytics displays Engagement Rate, CTR, Conversion Rate, CPL and Spending.
-- [ ] Analytics displays a 0–100 performance score and projected/observed scores can differ.
+- [ ] Analytics displays a 0–100 performance score; projected values change with campaign inputs and observed values come from uploaded data.
 - [ ] PDF export works.
 - [ ] CSV export works.
 
@@ -34,7 +34,7 @@
 - [ ] Backend `/health` returns HTTP 200.
 - [ ] Frontend `VITE_API_BASE_URL` points to the deployed backend.
 - [ ] Backend `CORS_ORIGINS` contains the deployed Vercel origin.
-- [ ] Database is persistent in the deployed environment and the PostgreSQL schema is initialized with the provided Alembic migrations.
+- [ ] Database is persistent in the deployed environment.
 - [ ] No production secrets are committed to GitHub.
 
 ## D. Submission evidence

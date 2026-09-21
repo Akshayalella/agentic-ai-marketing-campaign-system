@@ -10,15 +10,7 @@ class CampaignStrategyAgent:
         # Correct rounding drift so the allocation always equals the requested budget.
         if allocation:
             first=next(iter(allocation)); allocation[first]=round(allocation[first]+budget-sum(allocation.values()),2)
-        duration=max(1,int(b.get("duration_days",30) or 30))
-        awareness=max(1, round(duration*0.25))
-        consideration=max(1, round(duration*0.45))
-        if awareness + consideration > duration:
-            consideration=max(0, duration-awareness)
-        conversion=duration-awareness-consideration
-        if conversion < 0:
-            conversion=0
-            consideration=max(0, duration-awareness)
+        duration=int(b.get("duration_days",30) or 30)
         audience=b.get("target_audience","target customers")
         objective=b.get("objective","achieve the campaign objective")
         return {"strategy":{
@@ -38,9 +30,9 @@ class CampaignStrategyAgent:
             "budget_allocation":allocation,
             "timeline_days":duration,
             "timeline_phases":[
-                {"phase":"Awareness","days":awareness,"focus":"Problem education and audience reach"},
-                {"phase":"Consideration","days":consideration,"focus":"Features, differentiation and trust"},
-                {"phase":"Conversion","days":conversion,"focus":"CTA, follow-up and lead conversion"}
+                {"phase":"Awareness","days":max(1,round(duration*.25)),"focus":"Problem education and audience reach"},
+                {"phase":"Consideration","days":max(1,round(duration*.45)),"focus":"Features, differentiation and trust"},
+                {"phase":"Conversion","days":max(1,duration-max(1,round(duration*.25))-max(1,round(duration*.45))),"focus":"CTA, follow-up and lead conversion"}
             ],
             "kpis":["Engagement rate","CTR","Conversion rate","Cost per lead"],
             "success_criteria":["Approved platform-specific content","Measurable lead generation","Observed metrics separated from projections"]
