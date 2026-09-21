@@ -1,1 +1,149 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900"> <style> text{font-family:Arial,sans-serif;fill:#16213e} .box{fill:#f5f7ff;stroke:#4254a8;stroke-width:2} .agent{fill:#eef8f2;stroke:#2e8b57;stroke-width:2} .aux{fill:#fff6e8;stroke:#c27b20;stroke-width:2} .arrow{stroke:#475569;stroke-width:2;marker-end:url(#a)} </style> <defs> <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"> <path d="M0,0 L8,4 L0,8 z" fill="#475569"/> </marker> </defs> <text x="40" y="45" font-size="28" font-weight="700"> Agentic AI Marketing Campaign System </text> <rect class="box" x="450" y="75" width="300" height="65" rx="12"/> <text x="525" y="115" font-size="20">React + TypeScript UI</text> <line class="arrow" x1="600" y1="140" x2="600" y2="190"/> <rect class="box" x="450" y="190" width="300" height="65" rx="12"/> <text x="535" y="230" font-size="20">FastAPI REST API</text> <line class="arrow" x1="600" y1="255" x2="600" y2="305"/> <rect class="box" x="400" y="305" width="400" height="65" rx="12"/> <text x="475" y="345" font-size="20"> LangGraph Orchestrator + Shared Workflow State </text> <line class="arrow" x1="600" y1="370" x2="600" y2="410"/> <rect class="agent" x="70" y="410" width="300" height="60" rx="12"/> <text x="105" y="447" font-size="17">1. Requirement Analysis Agent</text> <rect class="agent" x="450" y="410" width="300" height="60" rx="12"/> <text x="480" y="447" font-size="17"> 2. Audience &amp; Competitor Research Agent </text> <rect class="agent" x="830" y="410" width="300" height="60" rx="12"/> <text x="875" y="447" font-size="17">3. Campaign Strategy Agent</text> <line class="arrow" x1="370" y1="440" x2="450" y2="440"/> <line class="arrow" x1="750" y1="440" x2="830" y2="440"/> <line class="arrow" x1="980" y1="470" x2="980" y2="520"/> <rect class="agent" x="830" y="520" width="300" height="60" rx="12"/> <text x="870" y="557" font-size="17">4. Content Generation Agent</text> <line class="arrow" x1="830" y1="550" x2="750" y2="550"/> <rect class="agent" x="450" y="520" width="300" height="60" rx="12"/> <text x="465" y="557" font-size="17"> 5. Content Review &amp; Brand Compliance Agent </text> <line class="arrow" x1="600" y1="580" x2="600" y2="625"/> <rect class="aux" x="450" y="625" width="300" height="60" rx="12"/> <text x="520" y="662" font-size="18">Human Approval Gate</text> <line class="arrow" x1="750" y1="655" x2="830" y2="655"/> <rect class="aux" x="830" y="625" width="300" height="60" rx="12"/> <text x="900" y="662" font-size="18">Content Calendar / Publishing</text> <line class="arrow" x1="980" y1="685" x2="980" y2="730"/> <rect class="agent" x="830" y="730" width="300" height="60" rx="12"/> <text x="865" y="767" font-size="17">6. Campaign Analytics Agent</text> <line class="arrow" x1="830" y1="760" x2="750" y2="760"/> <rect class="aux" x="450" y="730" width="300" height="60" rx="12"/> <text x="530" y="767" font-size="18">Final Campaign Report</text> <line class="arrow" x1="600" y1="790" x2="600" y2="830"/> <rect class="aux" x="450" y="830" width="300" height="60" rx="12"/> <text x="525" y="867" font-size="18">PDF / CSV Export</text> <rect class="aux" x="70" y="520" width="300" height="60" rx="12"/> <text x="145" y="557" font-size="18">LLM Provider</text> <line class="arrow" x1="370" y1="550" x2="450" y2="550"/> <rect class="aux" x="70" y="625" width="300" height="60" rx="12"/> <text x="145" y="662" font-size="18">Research Provider</text> <line class="arrow" x1="370" y1="655" x2="450" y2="550"/> <rect class="aux" x="70" y="730" width="300" height="60" rx="12"/> <text x="165" y="767" font-size="18">PostgreSQL</text> <line class="arrow" x1="370" y1="760" x2="450" y2="760"/> </svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="950" viewBox="0 0 1200 950">
+<style>
+text{font-family:Arial,sans-serif;fill:#16213e}
+.box{fill:#f5f7ff;stroke:#4254a8;stroke-width:2}
+.agent{fill:#eef8f2;stroke:#2e8b57;stroke-width:2}
+.aux{fill:#fff6e8;stroke:#c27b20;stroke-width:2}
+.arrow{stroke:#475569;stroke-width:2;fill:none;marker-end:url(#a)}
+</style>
+
+<defs>
+<marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+<path d="M0,0 L8,4 L0,8 z" fill="#475569"/>
+</marker>
+</defs>
+
+<text x="40" y="45" font-size="28" font-weight="700">
+Agentic AI Marketing Campaign System
+</text>
+
+<!-- Frontend -->
+
+<rect class="box" x="450" y="75" width="300" height="65" rx="12"/>
+<text x="525" y="115" font-size="20">React + TypeScript UI</text>
+
+<line class="arrow" x1="600" y1="140" x2="600" y2="190"/>
+
+<!-- API -->
+
+<rect class="box" x="450" y="190" width="300" height="65" rx="12"/>
+<text x="535" y="230" font-size="20">FastAPI REST API</text>
+
+<line class="arrow" x1="600" y1="255" x2="600" y2="305"/>
+
+<!-- Orchestrator -->
+
+<rect class="box" x="400" y="305" width="400" height="65" rx="12"/>
+<text x="465" y="345" font-size="20">
+LangGraph Orchestrator + Shared Workflow State
+</text>
+
+<!-- Main workflow -->
+
+<line class="arrow" x1="600" y1="370" x2="600" y2="405"/>
+
+<rect class="agent" x="70" y="405" width="300" height="60" rx="12"/>
+<text x="105" y="442" font-size="17">
+1. Requirement Analysis Agent
+</text>
+
+<rect class="agent" x="450" y="405" width="300" height="60" rx="12"/>
+<text x="475" y="442" font-size="17">
+2. Audience &amp; Competitor Research Agent
+</text>
+
+<rect class="agent" x="830" y="405" width="300" height="60" rx="12"/>
+<text x="875" y="442" font-size="17">
+3. Campaign Strategy Agent
+</text>
+
+<line class="arrow" x1="370" y1="435" x2="450" y2="435"/>
+<line class="arrow" x1="750" y1="435" x2="830" y2="435"/>
+
+<line class="arrow" x1="980" y1="465" x2="980" y2="510"/>
+
+<rect class="agent" x="830" y="510" width="300" height="60" rx="12"/>
+<text x="865" y="547" font-size="17">
+4. Content Generation Agent
+</text>
+
+<line class="arrow" x1="830" y1="540" x2="750" y2="540"/>
+
+<rect class="agent" x="450" y="510" width="300" height="60" rx="12"/>
+<text x="465" y="547" font-size="17">
+5. Content Review &amp; Brand Compliance Agent
+</text>
+
+<line class="arrow" x1="600" y1="570" x2="600" y2="615"/>
+
+<!-- Human approval -->
+
+<rect class="aux" x="450" y="615" width="300" height="60" rx="12"/>
+<text x="520" y="652" font-size="18">
+Human Approval Gate
+</text>
+
+<line class="arrow" x1="750" y1="645" x2="830" y2="645"/>
+
+<!-- Calendar -->
+
+<rect class="aux" x="830" y="615" width="300" height="60" rx="12"/>
+<text x="875" y="652" font-size="18">
+Content Calendar / Publishing
+</text>
+
+<line class="arrow" x1="980" y1="675" x2="980" y2="720"/>
+
+<!-- Analytics -->
+
+<rect class="agent" x="830" y="720" width="300" height="60" rx="12"/>
+<text x="865" y="757" font-size="17">
+6. Campaign Analytics Agent
+</text>
+
+<line class="arrow" x1="830" y1="750" x2="750" y2="750"/>
+
+<!-- Report -->
+
+<rect class="aux" x="450" y="720" width="300" height="60" rx="12"/>
+<text x="520" y="757" font-size="18">
+Final Campaign Report
+</text>
+
+<line class="arrow" x1="600" y1="780" x2="600" y2="820"/>
+
+<!-- Export -->
+
+<rect class="aux" x="450" y="820" width="300" height="60" rx="12"/>
+<text x="525" y="857" font-size="18">
+PDF / CSV Export
+</text>
+
+<!-- LLM Provider -->
+
+<rect class="aux" x="70" y="510" width="300" height="60" rx="12"/>
+<text x="145" y="547" font-size="18">
+LLM Provider
+</text>
+
+<line class="arrow" x1="370" y1="540" x2="400" y2="350"/>
+
+<!-- Research Provider -->
+
+<rect class="aux" x="70" y="615" width="300" height="60" rx="12"/>
+<text x="125" y="652" font-size="18">
+Research Provider
+</text>
+
+<line class="arrow" x1="370" y1="645" x2="450" y2="435"/>
+
+<!-- PostgreSQL -->
+
+<rect class="aux" x="70" y="720" width="300" height="60" rx="12"/>
+<text x="165" y="757" font-size="18">
+PostgreSQL
+</text>
+
+<line class="arrow" x1="370" y1="750" x2="450" y2="222"/>
+
+</svg>
