@@ -15,7 +15,9 @@ from app.services.export_service import csv_bytes, pdf_bytes
 import csv
 import io
 import json
+import os
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -264,6 +266,38 @@ def _worker(cid, stop_event):
         db.close()
 
     try:
+        # In demo mode, keep the workflow visibly "running" for a short
+        # configurable window so the Stop button can be demonstrated.
+        # The stop event is checked every 100 ms for responsive cancellation.
+        demo_stop_window = 8.0 if settings.demo_mode else 0.0
+
+        try:
+            configured_window = float(
+                os.getenv(
+                    "DEMO_STOP_WINDOW_SECONDS",
+                    str(demo_stop_window),
+                )
+            )
+            demo_stop_window = max(0.0, configured_window)
+        except (TypeError, ValueError):
+            pass
+
+        if settings.demo_mode and demo_stop_window > 0:
+            deadline = time.monotonic() + demo_stop_window
+
+            while time.monotonic() < deadline:
+                if stop_event.is_set():
+                    raise WorkflowStopped(
+                        "Workflow stopped by user"
+                    )
+
+                time.sleep(0.1)
+
+            if stop_event.is_set():
+                raise WorkflowStopped(
+                    "Workflow stopped by user"
+                )
+
         result = orch.run_campaign_cancellable(
             campaign_brief,
             stop_event.is_set,
